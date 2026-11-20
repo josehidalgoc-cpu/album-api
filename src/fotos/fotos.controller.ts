@@ -1,20 +1,16 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { FotosService } from './fotos.service.js';
-import type { Foto } from './entities/fotos.entity.js';
+import { CreateFotoDto } from './dto/create-foto.dto.js';
+import { UpdateFotoDto } from './dto/update-foto.dto.js';
 
-@Controller('fotos') // ruta base: /fotos
+@Controller('fotos')
 export class FotosController {
   constructor(private readonly fotosService: FotosService) {}
+
+  @Post()
+  create(@Body() createFotoDto: CreateFotoDto) {
+    return this.fotosService.create(createFotoDto);
+  }
 
   @Get()
   findAll() {
@@ -26,22 +22,18 @@ export class FotosController {
     return this.fotosService.findOne(id);
   }
 
-  @Post()
-  create(@Body() datos: Omit<Foto, 'id'>) {
-    return this.fotosService.create(datos);
-  }
-
+  // Endpoint para el reto: Update
   @Patch(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() datos: Partial<Omit<Foto, 'id'>>,
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() updateFotoDto: UpdateFotoDto
   ) {
-    return this.fotosService.update(id, datos);
+    return this.fotosService.update(id, updateFotoDto);
   }
 
+  // Endpoint para el reto: Remove
   @Delete(':id')
-  @HttpCode(204) // 204 No Content: se eliminó y no devuelve nada
   remove(@Param('id', ParseIntPipe) id: number) {
-    this.fotosService.remove(id);
+    return this.fotosService.remove(id);
   }
 }
