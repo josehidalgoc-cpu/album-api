@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  Query,
+  DefaultValuePipe,
+  ParseFloatPipe,
+} from '@nestjs/common';
 import { FotosService } from './fotos.service.js';
 import { CreateFotoDto } from './dto/create-foto.dto.js';
 import { UpdateFotoDto } from './dto/update-foto.dto.js';
@@ -12,9 +24,16 @@ export class FotosController {
     return this.fotosService.create(createFotoDto);
   }
 
+  // /api/fotos?min=3&max=5&q=foto&page=1&limit=5
   @Get()
-  findAll() {
-    return this.fotosService.findAll();
+  findAll(
+    @Query('min', new DefaultValuePipe(0), ParseFloatPipe) min: number,
+    @Query('max', new DefaultValuePipe(5), ParseFloatPipe) max: number,
+    @Query('q') q: string | undefined,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.fotosService.findAll({ min, max, q, page, limit });
   }
 
   @Get(':id')
