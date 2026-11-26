@@ -7,6 +7,7 @@ import { Foto } from './entities/foto.entity.js';
 
 export interface FiltroFotos {
   min: number; max: number; q?: string; page: number; limit: number;
+  etiqueta?: string; orden?: 'asc' | 'desc';
 }
 
 @Injectable()
@@ -21,14 +22,20 @@ export class FotosService {
     return await this.fotosRepository.save(nuevaFoto);
   }
 
-  async findAll({ min, max, q, page, limit }: FiltroFotos) {
+  async findAll({ min, max, q, page, limit, etiqueta, orden }: FiltroFotos) {
     const [data, total] = await this.fotosRepository.findAndCount({
       where: {
         calificacion: Between(min, max),
         ...(q && { titulo: ILike(`%${q}%`) }),
+        // RETO: filtrar por una relación
+        ...(etiqueta && { etiquetas: { texto: etiqueta } }),
       },
-      relations: { etiquetas: true },
-      order: { id: 'ASC' },
+      // RETO: incluir también el álbum de cada foto
+      relations: { etiquetas: true, album: true },
+      // RETO: ?orden=asc|desc ordena por calificación; sin él, por id
+      order: orden
+        ? { calificacion: orden === 'asc' ? 'ASC' : 'DESC' }
+        : { id: 'ASC' },
       skip: (page - 1) * limit,
       take: limit,
     });
