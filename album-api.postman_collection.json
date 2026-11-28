@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Album API - Sesión 5",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "api", "value": "http://localhost:3000/api" },
+    { "key": "fotoId", "value": "21" }
+  ],
+  "item": [
+    {
+      "name": "1. Listar con filtros (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{api}}/fotos?min=3&max=5&q=foto&page=1&limit=5"
+      }
+    },
+    {
+      "name": "2. Límite fuera de rango (400)",
+      "request": {
+        "method": "GET",
+        "url": "{{api}}/fotos?limit=999"
+      }
+    },
+    {
+      "name": "3. Crear foto válida (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  pm.collectionVariables.set('fotoId', pm.response.json().id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{api}}/fotos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Cerro Santa Ana\",\n  \"calificacion\": 4.8,\n  \"ruta\": \"https://picsum.photos/id/1/600/400\",\n  \"albumId\": 2,\n  \"etiquetas\": [\"Ciudad\", \"faro\"]\n}"
+        }
+      }
+    },
+    {
+      "name": "4. Crear con datos inválidos (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{api}}/fotos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"\",\n  \"calificacion\": 9,\n  \"ruta\": \"no-url\",\n  \"hack\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "5. Crear con álbum inexistente (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{api}}/fotos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Sin álbum\",\n  \"calificacion\": 3,\n  \"ruta\": \"https://picsum.photos/id/2/600/400\",\n  \"albumId\": 99\n}"
+        }
+      }
+    },
+    {
+      "name": "6. Actualizar parcialmente (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{api}}/fotos/{{fotoId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"calificacion\": 2.5 }"
+        }
+      }
+    },
+    {
+      "name": "7. Eliminar (204)",
+      "request": {
+        "method": "DELETE",
+        "url": "{{api}}/fotos/{{fotoId}}"
+      }
+    },
+    {
+      "name": "8. Ver foto eliminada (404)",
+      "request": {
+        "method": "GET",
+        "url": "{{api}}/fotos/{{fotoId}}"
+      }
+    }
+  ]
+}

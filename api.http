@@ -1,0 +1,50 @@
+@api = http://localhost:3000/api
+
+### Listar con filtros
+GET {{api}}/fotos?min=3&max=5&q=foto&page=1&limit=5
+
+### Límite fuera de rango → 400
+GET {{api}}/fotos?limit=999
+
+### Crear
+POST {{api}}/fotos
+Content-Type: application/json
+
+{
+  "titulo": "Cerro Santa Ana",
+  "calificacion": 4.8,
+  "ruta": "https://picsum.photos/id/1/600/400",
+  "albumId": 2,
+  "etiquetas": ["Ciudad", "faro"]
+}
+
+### Crear con datos inválidos → 400 con lista de errores
+POST {{api}}/fotos
+Content-Type: application/json
+
+{
+  "titulo": "",
+  "calificacion": 9,
+  "ruta": "no-url",
+  "hack": 1
+}
+
+### Crear con álbum inexistente → 400 (filtro de TypeORM)
+POST {{api}}/fotos
+Content-Type: application/json
+
+{
+  "titulo": "Sin álbum",
+  "calificacion": 3,
+  "ruta": "https://picsum.photos/id/2/600/400",
+  "albumId": 99
+}
+
+### Actualizar parcialmente
+PATCH {{api}}/fotos/21
+Content-Type: application/json
+
+{ "calificacion": 2.5 }
+
+### Eliminar → 204 sin cuerpo
+DELETE {{api}}/fotos/21

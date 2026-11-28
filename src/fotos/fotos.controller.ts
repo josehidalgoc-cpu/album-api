@@ -1,45 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
   Query,
-  DefaultValuePipe,
-  ParseFloatPipe,
-  ParseEnumPipe,
 } from '@nestjs/common';
-import { FotosService } from './fotos.service.js';
 import { CreateFotoDto } from './dto/create-foto.dto.js';
+import { QueryFotosDto } from './dto/query-fotos.dto.js';
 import { UpdateFotoDto } from './dto/update-foto.dto.js';
+import { FotosService } from './fotos.service.js';
 
 @Controller('fotos')
 export class FotosController {
   constructor(private readonly fotosService: FotosService) {}
 
-  @Post()
-  create(@Body() createFotoDto: CreateFotoDto) {
-    return this.fotosService.create(createFotoDto);
-  }
-
-  // /api/fotos?min=3&max=5&q=foto&page=1&limit=5
+  // /api/fotos?min=3&max=5&q=foto&page=1&limit=5&etiqueta=playa&orden=desc
   @Get()
-  findAll(
-    @Query('min', new DefaultValuePipe(0), ParseFloatPipe) min: number,
-    @Query('max', new DefaultValuePipe(5), ParseFloatPipe) max: number,
-    @Query('q') q: string | undefined,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    // RETO: ?etiqueta=playa
-    @Query('etiqueta') etiqueta: string | undefined,
-    // RETO: ?orden=asc|desc (cualquier otro valor responde 400)
-    @Query('orden', new ParseEnumPipe({ asc: 'asc', desc: 'desc' }, { optional: true }))
-    orden: 'asc' | 'desc' | undefined,
-  ) {
-    return this.fotosService.findAll({ min, max, q, page, limit, etiqueta, orden });
+  findAll(@Query() filtro: QueryFotosDto) {
+    return this.fotosService.findAll(filtro);
   }
 
   @Get(':id')
@@ -47,17 +31,18 @@ export class FotosController {
     return this.fotosService.findOne(id);
   }
 
-  // Endpoint para el reto: Update
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number, 
-    @Body() updateFotoDto: UpdateFotoDto
-  ) {
-    return this.fotosService.update(id, updateFotoDto);
+  @Post() // 201 Created por defecto
+  create(@Body() dto: CreateFotoDto) {
+    return this.fotosService.create(dto);
   }
 
-  // Endpoint para el reto: Remove
+  @Patch(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateFotoDto) {
+    return this.fotosService.update(id, dto);
+  }
+
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT) // 204: éxito sin cuerpo
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.fotosService.remove(id);
   }
